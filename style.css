@@ -75,3 +75,13 @@ body {
     height: 300px;
     position: absolute; 
 }
+
+.gameOverSign {
+    background-image: url('loser.png');
+    position: absolute;
+    width: 287px;
+    height: 160px;
+    left: 130px;
+    bottom: 300px;
+    z-index: +4;
+}

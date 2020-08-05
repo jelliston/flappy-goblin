@@ -69,15 +69,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(timerId)
             }
         }
+        
         let timerId = setInterval(moveObstacle, 20)
+        
         setTimeout(generateObstacle, 3000)
 
     }
+    
     generateObstacle()
 
 
     function gameOver() {
         clearInterval(gameTimerId)
+        const gameOverSign = document.createElement('div')
+        gameOverSign.classList.add('gameOverSign')
+        gameDisplay.appendChild(gameOverSign)
         console.log('game over')
         isGameOver = true
         document.removeEventListener('keyup', control)
