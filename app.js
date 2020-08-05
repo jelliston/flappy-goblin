@@ -1,14 +1,103 @@
+const profanityBaseURL = "https://www.purgomalum.com/service/plain?text=";
+const nickNamesDictionary = [
+  "pink crow",
+  "green pigeon",
+  "brown robin",
+  "blue woodpecker",
+  "purple sparrow",
+  "yellow kingfisher",
+  "gray warbler",
+  "orange bulbul",
+  "black drongo",
+  "red seagulls",
+  "beige flamingo",
+  "frost eagles",
+  "fuscia owl",
+  "mint kite",
+  "hickory parakeet",
+  "tortilla beeeater",
+  "wood munia",
+  "violet dove",
+  "eggplant peacock",
+  "golden oriole",
+  "magenta flycatcher",
+  "mulberry quail",
+  "slate magpie",
+  "navy roller",
+  "azure emu",
+  "arctic sunbird",
+  "iris starling",
+  "olive rockthrush",
+  "pecan barnowl",
+  "carob goose",
+  "coal duck",
+  "grease trogon",
+  "raven nightjar",
+  "sepia barbet",
+];
+
+let obstacleTimers = [];
+let gameStarted = false;
+let gameTimerId;
+let myScore = 0;
+let highScore = 0;
+let highScoreNickname = "anonymous panda";
+let myNickname; 
+
+if (localStorage.getItem("flappy-nickname")) {
+    myNickname = localStorage.getItem("flappy-nickname");
+  } else {
+    myNickname = nickNamesDictionary[Math.floor(Math.random() * 34)];
+    localStorage.setItem("flappy-nickname", myNickname);
+  }
+
 document.addEventListener('DOMContentLoaded', () => {
     const bird = document.querySelector('.bird');
     const gameDisplay = document.querySelector('.game-container');
-    const ground = document.querySelector('.ground');
+    const ground = document.querySelector(".ground-moving");
+    let nicknameInput = document.getElementById("nickname-input");
+    let updateNicknameBtn = document.getElementById("update-nickname");
+    let scoreLabel = document.getElementById("score-label");
+    let scoreList = document.getElementById("score-list");
 
+    let birdLeft = 220;
+    let birdBottom = 350;
+    let gravity = 2;
+    let isGameOver = false;
+    let gap = 450;
 
-    let birdLeft = 220
-    let birdBottom = 100
-    let gravity = 2
-    let isGameOver = false
-    let gap = 430
+    const filterNickname = async (nicknameText) => {
+        const http = new XMLHttpRequest();
+        let encodedText = encodeURIComponent(nicknameText);
+        http.open("GET", profanityBaseURL + encodedText + "&fill_text=***");
+        http.send();
+        http.onload = () => {
+            myNickname = http.responseText;
+            nicknameInput.value = myNickname;
+            localStorage.setItem("flappy-nickname", myNickname);
+        };
+    };
+
+    topScoreLabel.innerHTML = "Top score - " + highScore + "pts by " + highScoreNickname;
+    nicknameInput.value = myNickname;
+    updateNicknameBtn.addEventListener("click", () => {
+        filterNickname(nicknameInput.value);
+    });
+
+    // this prevents the default behavior of using the spacebar (scrolling down)
+    window.addEventListener("keydown", function (e) => {
+        if(e.keyCode == 32 && e.target == document.body) {
+            e.preventDefault();
+        }
+    });
+
+    gameDisplay.onclick = function () {
+        if (!gameStarted) {
+            gameStarted = true;
+            document.addEventListener("keydown", control);
+            gameTimerId = setInterval(startGame, 20)
+        }    
+    };
 
     function startGame() {
         birdBottom -= gravity
@@ -16,77 +105,74 @@ document.addEventListener('DOMContentLoaded', () => {
         bird.style.left = birdLeft + 'px'
     }
 
-    let gameTimerId = setInterval(startGame, 20)
-    
     function control(e) {
-        if (e.keyCode === 32) {
-            jump()
+        if (e.keyCode === 32 && !isGameOver) {
+            jump();
         }
-    }
+    };
 
     function jump() {
-        if (birdBottom < 500) {
-            birdBottom += 50
-        }        
-        bird.style.bottom  = birdBottom + 'px'
-        console.log(birdBottom)
+        if (birdBottom < 500) birdBottom += 50;
+        bird.style.bottom  = birdBottom + 'px';
     }
 
-    document.addEventListener('keyup', control)
+  function generateObstacles() {
+    if (!isGameOver) {
+      let obstacleLeft = 500;
+      let obstacleBottom = Math.random() + 60;
 
-    function generateObstacle () {
-        let obstacleLeft = 500
-        let randomHeight = Math.random() * 60 
-        let obstacleBottom = randomHeight
-        const obstacle = document.createElement('div')
-        const topObstacle = document.createElement('div')
-        if (!isGameOver) {
-            obstacle.classList.add('obstacle')
-            topObstacle.classList.add('topObstacle')
+      const obstacle = document.createElement("div");
+      const topObstacle = document.createElement("div");
+      obstacle.classList.add("obstacle");
+      topObstacle.classList.add("topObstacle");
+      gameDisplay.appendChild(obstacle);
+      gameDisplay.appendChild(topObstacle);
+      obstacle.style.left = obstacleLeft + "px";
+      obstacle.style.bottom = obstacleBottom + "px";
+      topObstacle.style.left = obstacleLeft + "px";
+      topObstacle.style.bottom = obstacleBottom + gap + "px";
+      let timerId = setInterval(moveObstacle, 20);
+      obstacleTimers.push(timerId);
+      function moveObstacle() {
+        obstacleLeft -= 2;
+        obstacle.style.left = obstacleLeft + "px";
+        topObstacle.style.left = obstacleLeft + "px";
+        if (obstacleLeft === 220) {
+          myScore++;
+          scoreLabel.innerHTML = "Score: " + myScore;
         }
-        gameDisplay.appendChild(obstacle)
-        gameDisplay.appendChild(topObstacle)
-        obstacle.style.left = obstacleLeft + 'px'
-        topObstacle.style.left = obstacleLeft + 'px'
-        obstacle.style.bottom = obstacleBottom + 'px'
-        topObstacle.style.bottom = obstacleBottom + gap + 'px'
-
-        function moveObstacle() {
-            obstacleLeft -= 2
-            obstacle.style.left = obstacleLeft
-            topObstacle.style.left = obstacleLeft
-
-            if (obstacleLeft === -60) {
-                clearInterval(timerId)
-                gameDisplay.removeChild(obstacle)
-                gameDisplay.removeChild(topObstacle)
-            }
-
-            if (obstacleLeft > 200 && obstacleLeft < 280 && birdLeft === 220 && 
-                (birdBottom < obstacleBottom + 153 || birdBottom > obstacleBottom + gap - 200)||
-                birdBottom === 0) {
-                gameOver()
-                clearInterval(timerId)
-            }
+        if (obstacleLeft === -50) {
+          clearInterval(timerId);
+          gameDisplay.removeChild(obstacle);
+          gameDisplay.removeChild(topObstacle);
         }
-        
-        let timerId = setInterval(moveObstacle, 20)
-        
-        setTimeout(generateObstacle, 3000)
-
+        if (
+          (obstacleLeft > 200 &&
+            obstacleLeft < 280 &&
+            birdLeft === 220 &&
+            (birdBottom < obstacleBottom + 210 ||
+              birdBottom > obstacleBottom + gap - 150)) ||
+          birdBottom === 0
+        ) {
+          for (timer in obstacleTimers) {
+            clearInterval(obstacleTimers[timer]);
+          }
+          gameOver();
+          isGameOver = true;
+        }
+      }
+      setTimeout(generateObstacles, 3000);
     }
-    
-    generateObstacle()
-
+  }
 
     function gameOver() {
-        clearInterval(gameTimerId)
-        const gameOverSign = document.createElement('div')
-        gameOverSign.classList.add('gameOverSign')
-        gameDisplay.appendChild(gameOverSign)
-        console.log('game over')
-        isGameOver = true
-        document.removeEventListener('keyup', control)
+        scoreLabel.innerHTML += " | Game Over";
+        clearInterval(gameTimerId);
+        console.log('game over');
+        isGameOver = true;
+        document.removeEventListener("keydown", control);
+        ground.classList.add("ground");
+        ground.classList.remove("ground-moving");
     }
 
 })
