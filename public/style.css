@@ -47,7 +47,7 @@ input {
     top: 0;
 }
 
-.rightSection {
+.right-section {
     width: calc(100% - 60px - 500px);
     height: 100vh;
     position: absolute;
