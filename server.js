@@ -1,11 +1,16 @@
-/* The server.js file will serve 2 roles 
-1. to host game files 
-2. game server that can maintain the game state and publish it back to all the players 
-(all players will communicate with Ably, and then Ably will communicate with the server)
-*/
+const envConfig = require("dotenv").config();
+const express = require("express");
+const ably = require("ably");
+const { request } = require("http");
 
-/* 3 server-side libraries are used with this project:
-1. Express - to listen for requests and send back responses (use to send game files to any player who would like to play)
-2. dotenv - to load ENV variables
-3. Ably - to implement websocket-based realtime messaging
-*/
+const app = express();
+app.use(express.static("public"));
+
+/*If I get a request to the root folder, send index.html back*/
+app.get("/", (request, response) => {
+    response.sendFile(__dirname + "/index.html")
+});
+
+const listener = app.listen(process.env.PORT, () => {
+    console.log("App is listening on port " + listener.address().port);
+});

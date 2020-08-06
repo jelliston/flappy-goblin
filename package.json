@@ -1,0 +1,25 @@
+{
+  "name": "flappy-goblin",
+  "version": "1.0.0",
+  "description": "multiplayer flappy goblin game",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jelliston/flappy-goblin.git"
+  },
+  "author": "Joel Elliston",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jelliston/flappy-goblin/issues"
+  },
+  "homepage": "https://github.com/jelliston/flappy-goblin#readme",
+  "dependencies": {
+    "ably": "^1.2.1",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  }
+}
