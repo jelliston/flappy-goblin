@@ -169,6 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function gameOver() {
     scoreLabel.innerHTML += " | Game Over";
     clearInterval(gameTimerId);
+    const gameOverSign = document.createElement('div')
+    gameOverSign.classList.add('gameOverSign')
+    gameDisplay.appendChild(gameOverSign)
     isGameOver = true;
     document.removeEventListener("keydown", control);
     ground.classList.add("ground");
